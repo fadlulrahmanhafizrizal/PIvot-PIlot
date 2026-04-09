@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/logo-pivot.png" type="image/png" />
+  <title>Pivot Pilot — The Startup Strategist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0f172a;
+      --navy-mid: #1e293b;
+      --navy-light: #334155;
+      --electric: #3b82f6;
+      --electric-glow: rgba(59,130,246,0.25);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245,158,11,0.2);
+      --crimson: #ef4444;
+      --crimson-glow: rgba(239,68,68,0.2);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16,185,129,0.2);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 90px;
+      overflow-x: hidden;
+    }
+
+    /* === GRID BG === */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* === HEADER === */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,23,42,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+    }
+
+    .header-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px; height: 38px;
+      background: var(--electric);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 16px var(--electric-glow);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-name span { color: var(--electric); }
+
+    .health-pill {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid;
+      font-weight: 700;
+      transition: all 0.5s;
+    }
+
+    .health-pill.healthy { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-glow); }
+    .health-pill.warning { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+    .health-pill.critical { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-glow); animation: pulse-red 1.5s infinite; }
+
+    @keyframes pulse-red {
+      0%,100% { box-shadow: 0 0 0 0 var(--crimson-glow); }
+      50% { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    /* === ALERT BANNER === */
+    .alert-banner {
+      display: none;
+      max-width: 640px;
+      margin: 16px auto 0;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-size: 13px;
+      font-weight: 600;
+      position: relative;
+      z-index: 10;
+    }
+
+    .alert-banner.warning { border-color: var(--amber); background: var(--amber-glow); color: var(--amber); }
+    .alert-banner.critical { border-color: var(--crimson); background: var(--crimson-glow); color: var(--crimson); }
+
+    /* === TABS NAV === */
+    .tab-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(15,23,42,0.96);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    }
+
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 0;
+      transition: color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-btn .tab-icon { font-size: 22px; }
+    .tab-btn.active { color: var(--electric); }
+
+    /* === PAGES === */
+    .page { display: none; animation: fadeUp 0.3s ease; }
+    .page.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === SECTION TITLE === */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    /* === CARDS === */
+    .card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+
+    /* === DASHBOARD PAGE === */
+    .health-score-ring {
+      width: 140px; height: 140px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+
+    .health-score-ring svg { transform: rotate(-90deg); }
+
+    .health-score-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .runway-bar {
+      height: 8px;
+      background: var(--navy-light);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .runway-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* === METRICS PAGE === */
+    .input-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--electric);
+      box-shadow: 0 0 0 3px var(--electric-glow);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: var(--electric);
+      color: white;
+      box-shadow: 0 4px 16px var(--electric-glow);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--electric-glow); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .trend-up { color: var(--emerald); }
+    .trend-down { color: var(--crimson); }
+    .trend-flat { color: var(--amber); }
+
+    /* === PIVOT LAB === */
+    .step-indicator {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .step-dot {
+      flex: 1;
+      height: 4px;
+      background: var(--navy-light);
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+
+    .step-dot.done { background: var(--electric); }
+    .step-dot.active { background: var(--amber); }
+
+    .question-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .question-text {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover { border-color: var(--electric); background: var(--electric-glow); }
+    .option-btn.selected { border-color: var(--electric); background: var(--electric-glow); color: var(--electric); }
+
+    .strategy-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--electric);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .strategy-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--electric), transparent);
+    }
+
+    .strategy-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--electric);
+      margin-bottom: 6px;
+    }
+
+    .strategy-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* === SIMULATOR === */
+    .sim-result {
+      font-family: 'Space Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--emerald);
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .sim-label {
+      font-size: 11px;
+      text-align: center;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* === CHECKLIST === */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .check-item:last-child { border-bottom: none; }
+
+    .check-box {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--navy-light);
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: all 0.2s;
+      margin-top: 1px;
+    }
+
+    .check-box.checked { background: var(--emerald); border-color: var(--emerald); }
+
+    .check-text { font-size: 14px; line-height: 1.5; }
+    .check-text.done { color: var(--text-dim); text-decoration: line-through; }
+
+    .unlock-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 16px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .unlock-btn.locked {
+      background: var(--navy-light);
+      color: var(--text-dim);
+      cursor: not-allowed;
+    }
+
+    .unlock-btn.unlocked {
+      background: var(--emerald);
+      color: white;
+      box-shadow: 0 4px 16px var(--emerald-glow);
+    }
+
+    /* === VAULT === */
+    .journal-textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 14px 16px;
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+
+    .journal-textarea:focus {
+      outline: none;
+      border-color: var(--electric);
+    }
+
+    .vault-entry {
+      background: var(--navy-mid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .vault-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .vault-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 6px;
+      margin-bottom: 8px;
+    }
+
+    .tag-pivot { background: var(--electric-glow); color: var(--electric); border: 1px solid var(--electric); }
+    .tag-fail { background: var(--crimson-glow); color: var(--crimson); border: 1px solid var(--crimson); }
+    .tag-learn { background: var(--emerald-glow); color: var(--emerald); border: 1px solid var(--emerald); }
+
+    /* Anti-Bias Bot */
+    .bot-message {
+      background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1));
+      border: 1px solid var(--amber);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .bot-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .bot-avatar {
+      width: 32px; height: 32px;
+      background: var(--amber);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .bot-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    .bot-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* select styling */
+    select.input-field {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    /* Empty State */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-text { font-size: 14px; }
+
+    @media (max-width: 400px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+  <div class="header-inner">
+    <div class="brand" style="display: flex; align-items: center; gap: 12px;">
+      <img src="icons/logo-pivot.png" alt="Logo" style="width: 42px; height: 42px; border-radius: 8px; object-fit: contain;">
+      <div class="brand-name" style="margin: 0; line-height: 1;">Pivot<span>Pilot</span></div>
+    </div>
+    <div class="health-pill healthy" id="healthPill">HEALTHY · 82</div>
+  </div>
+</header>
+
+  <!-- ALERT BANNER -->
+  <div style="max-width:640px;margin:0 auto;padding:0 16px">
+    <div class="alert-banner" id="alertBanner"></div>
+  </div>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div class="page active" id="page-dashboard">
+    <div class="container">
+
+      <div class="card" style="text-align:center">
+        <div class="card-title">Business Health Score</div>
+        <div class="health-score-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#1e293b" stroke-width="12"/>
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#3b82f6" stroke-width="12"
+              stroke-dasharray="364.4" id="scoreArc"
+              stroke-dashoffset="65.6" stroke-linecap="round"/>
+          </svg>
+          <div class="health-score-center">
+            <div class="score-number" id="scoreNum" style="color:var(--electric)">82</div>
+            <div class="score-label">/ 100</div>
+          </div>
+        </div>
+        <div id="scoreStatus" style="font-size:13px;color:var(--text-dim)">Status: <b style="color:var(--emerald)">Stabil</b> — Pertahankan momentum ini!</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stat-card">
+          <div class="stat-label">💰 Runway</div>
+          <div class="stat-value" id="runwayVal" style="color:var(--emerald)">4.2</div>
+          <div class="stat-sub">bulan tersisa</div>
+          <div class="runway-bar">
+            <div class="runway-fill" id="runwayBar" style="width:70%;background:var(--emerald)"></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">🔥 Burn Rate</div>
+          <div class="stat-value" id="burnVal" style="color:var(--amber)">2.4</div>
+          <div class="stat-sub">jt / bulan</div>
+          <div class="stat-sub" style="margin-top:8px;font-size:10px">Modal: <b id="capitalVal">10 jt</b></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stat-card">
+          <div class="stat-label">📈 User Growth</div>
+          <div class="stat-value" id="userGrowthVal" style="color:var(--emerald)">+12%</div>
+          <div class="stat-sub" id="userGrowthSub">vs periode lalu</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">💵 Revenue</div>
+          <div class="stat-value" id="revenueVal" style="color:var(--electric)">5.5 jt</div>
+          <div class="stat-sub" id="revenueSub">bulan ini</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Riwayat Metrik (3 Periode)</div>
+        <div id="trendSummary" style="font-size:13px;line-height:1.8;color:var(--text-dim)">
+          Belum ada data histori. Input metrik di tab <b style="color:var(--electric)">Tracking</b>.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== TRACKING ===================== -->
+  <div class="page" id="page-tracking">
+    <div class="container">
+
+      <div class="bot-message" id="antiBiasBot">
+        <div class="bot-header">
+          <div class="bot-avatar">🤖</div>
+          <div class="bot-name">Anti-Bias Bot</div>
+        </div>
+        <div class="bot-text" id="botText"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📥 Input Metrik Mingguan</div>
+
+        <div class="input-label">Pengguna Aktif (orang)</div>
+        <input class="input-field" type="number" id="inp_users" placeholder="cth: 150" min="0">
+
+        <div class="input-label">Pendapatan (Rp ribu)</div>
+        <input class="input-field" type="number" id="inp_revenue" placeholder="cth: 5500" min="0">
+
+        <div class="input-label">Pengeluaran / Burn Rate (Rp ribu)</div>
+        <input class="input-field" type="number" id="inp_burn" placeholder="cth: 2400" min="0">
+
+        <div class="input-label">Modal Tersisa (Rp ribu)</div>
+        <input class="input-field" type="number" id="inp_capital" placeholder="cth: 10000" min="0">
+
+        <div class="input-label">Customer Feedback Score (1–10)</div>
+        <input class="input-field" type="number" id="inp_feedback" placeholder="cth: 7" min="1" max="10">
+
+        <button class="btn btn-primary" onclick="submitMetrics()">💾 Simpan & Analisis</button>
+      </div>
+
+      <div class="card" id="historyCard">
+        <div class="card-title">🕒 Riwayat Input</div>
+        <div id="historyList">
+          <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada data masuk.</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== PIVOT LAB ===================== -->
+  <div class="page" id="page-lab">
+    <div class="container">
+
+      <!-- Sub-tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;overflow-x:auto">
+        <button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px" onclick="showLabTab('diagnose')" id="lt-diagnose">🔍 Diagnosa</button>
+        <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px" onclick="showLabTab('simulate')" id="lt-simulate">📊 Simulator</button>
+        <button class="btn btn-secondary" style="flex:1;padding:10px;font-size:13px" onclick="showLabTab('checklist')" id="lt-checklist">✅ Validasi</button>
+      </div>
+
+      <!-- Diagnose -->
+      <div id="lab-diagnose">
+        <div class="step-indicator" id="stepIndicator">
+          <div class="step-dot active"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <div class="question-card" id="qCard">
+          <div class="question-text" id="qText">Loading...</div>
+          <div id="qOptions"></div>
+        </div>
+
+        <div id="strategyResult" style="display:none">
+          <p class="section-title">⚡ Rekomendasi Strategi Pivot</p>
+          <div id="strategyCards"></div>
+          <button class="btn btn-secondary" onclick="resetDiagnose()" style="margin-top:8px">🔄 Diagnosa Ulang</button>
+        </div>
+      </div>
+
+      <!-- Simulator -->
+      <div id="lab-simulate" style="display:none">
+        <div class="card">
+          <div class="card-title">📊 What-If Simulator</div>
+
+          <div class="input-label">Model Bisnis Saat Ini</div>
+          <select class="input-field" id="sim_current">
+            <option>Jual Putus (One-time)</option>
+            <option>Freemium</option>
+            <option>Berlangganan (Subscription)</option>
+            <option>Komisi / Marketplace</option>
+          </select>
+
+          <div class="input-label">Target Model Baru</div>
+          <select class="input-field" id="sim_new">
+            <option>Berlangganan (Subscription)</option>
+            <option>Jual Putus (One-time)</option>
+            <option>Freemium</option>
+            <option>Komisi / Marketplace</option>
+          </select>
+
+          <div class="input-label">Estimasi Pelanggan Aktif</div>
+          <input class="input-field" type="number" id="sim_customers" placeholder="cth: 100" min="0">
+
+          <div class="input-label">Harga Langganan/Produk (Rp ribu)</div>
+          <input class="input-field" type="number" id="sim_price" placeholder="cth: 49" min="0">
+
+          <div class="input-label">Growth Rate per Bulan (%)</div>
+          <input class="input-field" type="number" id="sim_growth" placeholder="cth: 10" min="0" max="100">
+
+          <button class="btn btn-primary" onclick="runSimulator()">🚀 Hitung Proyeksi 6 Bulan</button>
+        </div>
+
+        <div class="card" id="simResultCard" style="display:none">
+          <div class="card-title">📈 Hasil Proyeksi</div>
+          <div class="sim-result" id="simResult">Rp 0</div>
+          <div class="sim-label" id="simLabel">Total Estimasi Pendapatan 6 Bulan</div>
+          <div id="simBreakdown" style="margin-top:16px;font-size:13px;color:var(--text-dim);line-height:2"></div>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div id="lab-checklist" style="display:none">
+        <div class="card">
+          <div class="card-title">✅ Market Validation Checklist</div>
+          <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">Centang semua bukti validasi sebelum pivot diizinkan.</p>
+          <div id="checklistItems"></div>
+          <button class="unlock-btn locked" id="unlockBtn" onclick="executePivot()">🔒 Execute Pivot (Selesaikan semua dulu)</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== VAULT ===================== -->
+  <div class="page" id="page-vault">
+    <div class="container">
+      <div class="card">
+        <div class="card-title">📝 Post-Mortem Journal</div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">Catat pelajaran dari kegagalan atau momen pivot penting.</p>
+
+        <div class="input-label">Judul Catatan</div>
+        <input class="input-field" type="text" id="vault_title" placeholder="cth: Pivot ke B2B gagal karena...">
+
+        <div class="input-label">Kategori</div>
+        <select class="input-field" id="vault_tag">
+          <option value="learn">💡 Pelajaran</option>
+          <option value="pivot">🔄 Pivot</option>
+          <option value="fail">❌ Kegagalan</option>
+        </select>
+
+        <div class="input-label">Isi Catatan</div>
+        <textarea class="journal-textarea" id="vault_text" placeholder="Apa yang terjadi? Apa yang bisa diperbaiki? Apa keputusan yang diambil?"></textarea>
+
+        <button class="btn btn-primary" onclick="saveJournal()">💾 Simpan ke Vault</button>
+      </div>
+
+      <p class="section-title" style="margin-top:8px">📁 Arsip Catatan</p>
+      <div id="vaultList">
+        <div class="empty"><div class="empty-icon">🗄️</div><div class="empty-text">Vault kosong. Mulai catat perjalananmu.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="showPage('dashboard', this)">
+      <span class="tab-icon">📡</span>Dashboard
+    </button>
+    <button class="tab-btn" onclick="showPage('tracking', this)">
+      <span class="tab-icon">📊</span>Tracking
+    </button>
+    <button class="tab-btn" onclick="showPage('lab', this)">
+      <span class="tab-icon">⚗️</span>Pivot Lab
+    </button>
+    <button class="tab-btn" onclick="showPage('vault', this)">
+      <span class="tab-icon">🗄️</span>Vault
+    </button>
+  </nav>
+
+  <script>
+    // ===== STATE =====
+    let metrics = JSON.parse(localStorage.getItem('pp_metrics') || '[]');
+    let journal = JSON.parse(localStorage.getItem('pp_journal') || '[]');
+    let checklist = JSON.parse(localStorage.getItem('pp_checklist') || JSON.stringify([
+      { text: 'Wawancara minimal 10 calon pelanggan baru', done: false },
+      { text: 'Buat Landing Page / MVP untuk ide baru', done: false },
+      { text: 'Riset kompetitor: apakah sudah ada yang melakukan ini?', done: false },
+      { text: 'Kalkulasi ulang Unit Economics (CAC vs LTV)', done: false },
+      { text: 'Dapatkan minimal 3 komitmen (Letter of Intent) dari calon klien', done: false },
+    ]));
+
+    // ===== NAVIGATION =====
+    function showPage(id, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      btn.classList.add('active');
+      if (id === 'dashboard') refreshDashboard();
+      if (id === 'lab') renderChecklist();
+    }
+
+    function showLabTab(id) {
+      ['diagnose','simulate','checklist'].forEach(t => {
+        document.getElementById('lab-' + t).style.display = t === id ? 'block' : 'none';
+        const btn = document.getElementById('lt-' + t);
+        btn.className = t === id ? 'btn btn-primary' : 'btn btn-secondary';
+        btn.style.flex = '1'; btn.style.padding = '10px'; btn.style.fontSize = '13px';
+      });
+    }
+
+    // ===== HEALTH SCORE =====
+    function calcHealthScore() {
+      if (metrics.length === 0) return 82; // default
+      const last = metrics[metrics.length - 1];
+      let score = 50;
+      // Runway contribution (max 30)
+      const runway = last.capital / last.burn;
+      if (runway >= 6) score += 30;
+      else if (runway >= 3) score += 20;
+      else if (runway >= 1) score += 10;
+      // Revenue vs Burn (max 20)
+      if (last.revenue > last.burn) score += 20;
+      else if (last.revenue > last.burn * 0.7) score += 10;
+      // Feedback (max 15)
+      if (last.feedback >= 8) score += 15;
+      else if (last.feedback >= 6) score += 8;
+      // User growth trend (max 15) - needs 2+ entries
+      if (metrics.length >= 2) {
+        const prev = metrics[metrics.length - 2];
+        if (last.users > prev.users) score += 15;
+        else if (last.users === prev.users) score += 5;
+      } else { score += 10; }
+      return Math.min(100, Math.max(0, Math.round(score)));
+    }
+
+    function refreshDashboard() {
+      const score = calcHealthScore();
+      document.getElementById('scoreNum').textContent = score;
+      // Arc
+      const circ = 364.4;
+      const offset = circ - (circ * score / 100);
+      document.getElementById('scoreArc').setAttribute('stroke-dashoffset', offset);
+
+      let color, statusText, pillClass;
+      if (score >= 65) {
+        color = 'var(--emerald)'; pillClass = 'healthy';
+        statusText = 'Status: <b style="color:var(--emerald)">Stabil</b> — Pertahankan momentum ini!';
+      } else if (score >= 40) {
+        color = 'var(--amber)'; pillClass = 'warning';
+        statusText = 'Status: <b style="color:var(--amber)">Waspada</b> — Evaluasi strategi segera!';
+      } else {
+        color = 'var(--crimson)'; pillClass = 'critical';
+        statusText = 'Status: <b style="color:var(--crimson)">KRITIS</b> — Pivot atau tutup sebelum modal habis!';
+      }
+      document.getElementById('scoreNum').style.color = color;
+      document.getElementById('scoreArc').setAttribute('stroke', color);
+      document.getElementById('scoreStatus').innerHTML = statusText;
+      const pill = document.getElementById('healthPill');
+      pill.className = 'health-pill ' + pillClass;
+      pill.textContent = (pillClass === 'healthy' ? 'HEALTHY' : pillClass === 'warning' ? 'WARNING' : 'CRITICAL') + ' · ' + score;
+
+      // Alert
+      const banner = document.getElementById('alertBanner');
+      if (metrics.length >= 3) {
+        const last3 = metrics.slice(-3);
+        const declining = last3[2].users < last3[1].users && last3[1].users < last3[0].users;
+        if (declining) {
+          banner.style.display = 'block';
+          banner.className = 'alert-banner critical';
+          banner.textContent = '🚨 Pengguna turun 3 periode berturut-turut. Data menunjukkan stagnasi — saatnya evaluasi strategi Pivot!';
+        } else if (score < 50) {
+          banner.style.display = 'block';
+          banner.className = 'alert-banner warning';
+          banner.textContent = '⚠️ Health Score di bawah 50. Periksa Runway dan Revenue kamu di tab Pivot Lab.';
+        } else {
+          banner.style.display = 'none';
+        }
+      } else { banner.style.display = 'none'; }
+
+      // Stats
+      if (metrics.length > 0) {
+        const last = metrics[metrics.length - 1];
+        const runway = last.burn > 0 ? (last.capital / last.burn).toFixed(1) : '∞';
+        document.getElementById('runwayVal').textContent = runway;
+        const runwayPct = Math.min(100, (parseFloat(runway) / 12) * 100);
+        const rbar = document.getElementById('runwayBar');
+        rbar.style.width = runwayPct + '%';
+        rbar.style.background = parseFloat(runway) >= 3 ? 'var(--emerald)' : 'var(--crimson)';
+        document.getElementById('runwayVal').style.color = parseFloat(runway) >= 3 ? 'var(--emerald)' : 'var(--crimson)';
+
+        document.getElementById('burnVal').textContent = (last.burn / 1000).toFixed(1) + ' jt';
+        document.getElementById('capitalVal').textContent = (last.capital / 1000).toFixed(1) + ' jt';
+        document.getElementById('revenueVal').textContent = (last.revenue / 1000).toFixed(1) + ' jt';
+
+        if (metrics.length >= 2) {
+          const prev = metrics[metrics.length - 2];
+          const growth = prev.users > 0 ? (((last.users - prev.users) / prev.users) * 100).toFixed(1) : 0;
+          document.getElementById('userGrowthVal').textContent = (growth >= 0 ? '+' : '') + growth + '%';
+          document.getElementById('userGrowthVal').style.color = growth >= 0 ? 'var(--emerald)' : 'var(--crimson)';
+        }
+
+        // Trend Summary
+        if (metrics.length >= 2) {
+          let html = '';
+          metrics.slice(-3).reverse().forEach((m, i) => {
+            html += `<div class="history-item">
+              <span>Periode ${metrics.length - i}</span>
+              <span>${m.users} user · Rp ${(m.revenue/1000).toFixed(0)}k · Feedback ${m.feedback}/10</span>
+            </div>`;
+          });
+          document.getElementById('trendSummary').innerHTML = html;
+        }
+      }
+    }
+
+    // ===== METRICS =====
+    function submitMetrics() {
+      const u = +document.getElementById('inp_users').value;
+      const r = +document.getElementById('inp_revenue').value;
+      const b = +document.getElementById('inp_burn').value;
+      const c = +document.getElementById('inp_capital').value;
+      const f = +document.getElementById('inp_feedback').value;
+      if (!u || !r || !b || !c || !f) { alert('Isi semua field terlebih dahulu!'); return; }
+      if (f < 1 || f > 10) { alert('Feedback score harus antara 1–10'); return; }
+
+      const entry = { users: u, revenue: r, burn: b, capital: c, feedback: f, date: new Date().toLocaleDateString('id-ID') };
+      metrics.push(entry);
+      localStorage.setItem('pp_metrics', JSON.stringify(metrics));
+
+      // Anti-Bias Bot
+      const bot = document.getElementById('antiBiasBot');
+      const cac = b / Math.max(u, 1);
+      const ltv = r / Math.max(u, 1) * 12;
+      let botMsg = '';
+      if (cac > ltv) {
+        botMsg = `⚠️ <b>Biaya Akuisisi (CAC) Rp ${cac.toFixed(0)}k</b> lebih besar dari nilai pelanggan (LTV) <b>Rp ${ltv.toFixed(0)}k/tahun</b>. Setiap pelanggan baru justru merugikan. Apakah strategi ini masih layak dilanjutkan?`;
+      } else if (metrics.length >= 3) {
+        const last3u = metrics.slice(-3).map(m => m.users);
+        if (last3u[2] < last3u[1] && last3u[1] < last3u[0]) {
+          botMsg = `🔴 <b>Pengguna turun 3 periode berturut-turut.</b> Dengan burn rate Rp ${(b/1000).toFixed(1)}jt/bulan, sisa modal hanya cukup <b>${(c/b).toFixed(1)} bulan</b>. Apakah kamu masih yakin strategi ini bekerja?`;
+        }
+      }
+      if (botMsg) {
+        bot.style.display = 'block';
+        document.getElementById('botText').innerHTML = botMsg;
+      } else {
+        bot.style.display = 'none';
+      }
+
+      renderHistory();
+      refreshDashboard();
+      alert('✅ Metrik berhasil disimpan!');
+    }
+
+    function renderHistory() {
+      const el = document.getElementById('historyList');
+      if (metrics.length === 0) {
+        el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada data.</div></div>';
+        return;
+      }
+      el.innerHTML = metrics.slice().reverse().map((m, i) => `
+        <div class="history-item">
+          <div>
+            <div style="font-weight:700;font-size:14px">Periode ${metrics.length - i} · ${m.date}</div>
+            <div style="font-size:12px;color:var(--text-dim)">👤 ${m.users} user · 💵 Rp ${(m.revenue/1000).toFixed(0)}k · 🔥 Rp ${(m.burn/1000).toFixed(0)}k · ⭐ ${m.feedback}/10</div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--electric)">
+            Runway: ${(m.capital/m.burn).toFixed(1)}bl
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ===== DIAGNOSE =====
+    const questions = [
+      {
+        q: 'Apa masalah utama yang dihadapi startupmu saat ini?',
+        opts: ['Produk tidak disukai pengguna', 'Tidak ada yang mau bayar', 'Biaya operasional terlalu tinggi', 'Target pasar terlalu kecil']
+      },
+      {
+        q: 'Bagaimana kondisi feedback dari pengguna yang sudah mencoba produkmu?',
+        opts: ['Positif, tapi fiturnya terlalu kompleks', 'Mereka suka, tapi tidak mau bayar', 'Negatif, produknya tidak relevan', 'Feedback bagus tapi growth stagnan']
+      },
+      {
+        q: 'Berapa lama waktu yang dibutuhkan untuk mendapatkan 1 pelanggan baru?',
+        opts: ['Kurang dari 1 minggu', '1–4 minggu', '1–3 bulan', 'Lebih dari 3 bulan']
+      }
+    ];
+
+    const strategies = {
+      '0-0': [{ name: 'Product Pivot', desc: 'Bangun ulang produk dari nol berdasarkan feedback terdalam pengguna. Fokus pada pain point nomor 1 saja.' }],
+      '0-1': [{ name: 'Zoom-in Pivot', desc: 'Sederhanakan produk. Ambil 1 fitur terkuat dan jadikan itu produk utama. Hapus sisanya.' }],
+      '0-2': [{ name: 'Technology Pivot', desc: 'Platform atau teknologi yang digunakan mungkin salah. Pertimbangkan solusi lebih sederhana dan murah.' }],
+      '0-3': [{ name: 'Customer Segment Pivot', desc: 'Ganti segmen target. Jika B2C tidak berhasil, coba B2B. Atau sebaliknya.' }],
+      '1-0': [{ name: 'Business Model Pivot', desc: 'Produkmu bagus tapi monetisasi salah. Coba model freemium → premium atau subscription.' }, { name: 'Value Capture Pivot', desc: 'Ubah cara kamu mengambil nilai dari pengguna. Coba model berbasis komisi atau iklan.' }],
+      '1-1': [{ name: 'Revenue Model Pivot', desc: 'Ubah dari jual putus ke berlangganan. Recurring revenue lebih stabil untuk startup.' }],
+      '2-0': [{ name: 'Platform Pivot', desc: 'Pindah dari native app ke web-based, atau dari SaaS ke open-source dengan support berbayar.' }, { name: 'Channel Pivot', desc: 'Ganti saluran distribusi. Jika direct sales mahal, coba partnership atau marketplace.' }],
+      'default': [{ name: 'Customer Segment Pivot', desc: 'Ubah target pasar untuk menemukan segmen dengan willingness-to-pay lebih tinggi.' }, { name: 'Zoom-in Pivot', desc: 'Fokus pada 1 fitur utama agar lebih efisien secara biaya dan development.' }]
+    };
+
+    let diagAnswers = [];
+    let currentQ = 0;
+
+    function renderQuestion() {
+      const q = questions[currentQ];
+      document.getElementById('qText').textContent = q.q;
+      const optEl = document.getElementById('qOptions');
+      optEl.innerHTML = q.opts.map((o, i) => `
+        <button class="option-btn" onclick="selectOption(${i})">${o}</button>
+      `).join('');
+      const dots = document.getElementById('stepIndicator').children;
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].className = 'step-dot' + (i < currentQ ? ' done' : i === currentQ ? ' active' : '');
+      }
+    }
+
+    function selectOption(idx) {
+      diagAnswers[currentQ] = idx;
+      document.querySelectorAll('#qOptions .option-btn').forEach((b, i) => {
+        b.className = 'option-btn' + (i === idx ? ' selected' : '');
+      });
+      setTimeout(() => {
+        currentQ++;
+        if (currentQ < questions.length) {
+          renderQuestion();
+        } else {
+          showResult();
+        }
+      }, 400);
+    }
+
+    function showResult() {
+      document.getElementById('qCard').style.display = 'none';
+      document.getElementById('stepIndicator').style.display = 'none';
+      document.getElementById('strategyResult').style.display = 'block';
+      const key = diagAnswers[0] + '-' + diagAnswers[1];
+      const strats = strategies[key] || strategies['default'];
+      document.getElementById('strategyCards').innerHTML = strats.map(s => `
+        <div class="strategy-card">
+          <div class="strategy-name">🎯 ${s.name}</div>
+          <div class="strategy-desc">${s.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function resetDiagnose() {
+      diagAnswers = []; currentQ = 0;
+      document.getElementById('qCard').style.display = 'block';
+      document.getElementById('stepIndicator').style.display = 'flex';
+      document.getElementById('strategyResult').style.display = 'none';
+      renderQuestion();
+    }
+
+    // ===== SIMULATOR =====
+    function runSimulator() {
+      const cust = +document.getElementById('sim_customers').value;
+      const price = +document.getElementById('sim_price').value;
+      const growth = +document.getElementById('sim_growth').value / 100;
+      if (!cust || !price) { alert('Isi jumlah pelanggan dan harga terlebih dahulu!'); return; }
+
+      let total = 0, breakdown = '', currentCust = cust;
+      for (let m = 1; m <= 6; m++) {
+        const rev = currentCust * price;
+        total += rev;
+        breakdown += `Bulan ${m}: ${currentCust} pelanggan × Rp ${price}k = <b style="color:var(--electric)">Rp ${(rev/1000).toFixed(0)}k</b><br>`;
+        currentCust = Math.round(currentCust * (1 + growth));
+      }
+      document.getElementById('simResult').textContent = 'Rp ' + (total/1000).toFixed(0) + 'k';
+      document.getElementById('simBreakdown').innerHTML = breakdown;
+      document.getElementById('simResultCard').style.display = 'block';
+    }
+
+    // ===== CHECKLIST =====
+    function renderChecklist() {
+      const el = document.getElementById('checklistItems');
+      el.innerHTML = checklist.map((item, i) => `
+        <div class="check-item">
+          <div class="check-box ${item.done ? 'checked' : ''}" onclick="toggleCheck(${i})">
+            ${item.done ? '✓' : ''}
+          </div>
+          <div class="check-text ${item.done ? 'done' : ''}">${item.text}</div>
+        </div>
+      `).join('');
+      const allDone = checklist.every(c => c.done);
+      const btn = document.getElementById('unlockBtn');
+      const doneCount = checklist.filter(c => c.done).length;
+      if (allDone) {
+        btn.className = 'unlock-btn unlocked';
+        btn.textContent = '🚀 Execute Pivot! (Semua Validasi Selesai)';
+      } else {
+        btn.className = 'unlock-btn locked';
+        btn.textContent = `🔒 Execute Pivot (${doneCount}/${checklist.length} selesai)`;
+      }
+    }
+
+    function toggleCheck(i) {
+      checklist[i].done = !checklist[i].done;
+      localStorage.setItem('pp_checklist', JSON.stringify(checklist));
+      renderChecklist();
+    }
+
+    function executePivot() {
+      if (!checklist.every(c => c.done)) return;
+      alert('🎉 Pivot Diizinkan!\n\nSemua validasi selesai. Kamu siap untuk mengeksekusi strategi baru. Catat keputusan ini di Vault!');
+    }
+
+    // ===== VAULT =====
+    function saveJournal() {
+      const title = document.getElementById('vault_title').value.trim();
+      const text = document.getElementById('vault_text').value.trim();
+      const tag = document.getElementById('vault_tag').value;
+      if (!title || !text) { alert('Isi judul dan isi catatan!'); return; }
+      journal.unshift({ title, text, tag, date: new Date().toLocaleDateString('id-ID') });
+      localStorage.setItem('pp_journal', JSON.stringify(journal));
+      document.getElementById('vault_title').value = '';
+      document.getElementById('vault_text').value = '';
+      renderVault();
+      alert('✅ Catatan disimpan ke Vault!');
+    }
+
+    function renderVault() {
+      const el = document.getElementById('vaultList');
+      if (journal.length === 0) {
+        el.innerHTML = '<div class="empty"><div class="empty-icon">🗄️</div><div class="empty-text">Vault kosong. Mulai catat perjalananmu.</div></div>';
+        return;
+      }
+      el.innerHTML = journal.map((j, i) => `
+        <div class="vault-entry">
+          <div class="vault-meta">${j.date}</div>
+          <span class="tag tag-${j.tag}">${j.tag === 'learn' ? '💡 Pelajaran' : j.tag === 'pivot' ? '🔄 Pivot' : '❌ Kegagalan'}</span>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px">${j.title}</div>
+          <div class="vault-text">${j.text}</div>
+        </div>
+      `).join('');
+    }
+
+    // ===== INIT =====
+    refreshDashboard();
+    renderHistory();
+    renderQuestion();
+    renderVault();
+
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('Service Worker terdaftar!', reg))
+        .catch(err => console.log('Gagal daftar Service Worker', err));
+    });
+    }
+  </script>
+
+</body>
+</html>
