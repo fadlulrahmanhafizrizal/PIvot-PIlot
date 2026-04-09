@@ -1,0 +1,7 @@
+{
+  "web_apps": [
+    {
+      "manifest": "/Pivot-Pilot/manifest.json"
+    }
+  ]
+}
